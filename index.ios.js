@@ -1,6 +1,7 @@
 /**
  * Sample React Native Music App
- * https://github.com/facebook/react-native
+ * https://github.com/nhayflick/ReactNativeMusic
+ * https://medium.com/@Nayflix/building-a-soundcloud-app-with-react-native-1144b6d3773a
  */
 'use strict';
 
