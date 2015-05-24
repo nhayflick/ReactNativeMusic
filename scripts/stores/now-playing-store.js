@@ -14,6 +14,7 @@ var SOUNDCLOUD_CLIENT_ID = 'ff3108ddadaeeea1c2cd56d0b3617255';
 function playTrack (nowPlaying) {
   _nowPlaying = nowPlaying;
   _playState = 'PLAYING';
+  _playbackTime = 0;
 }
 
 function updatePlaybackTime (time) {
