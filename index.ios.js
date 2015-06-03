@@ -21,7 +21,9 @@ var {
 
 var TimerMixin = require('react-timer-mixin');
 var NowPlayingStore = require('./scripts/stores/now-playing-store');
+var TracksCollectionStore = require('./scripts/stores/tracks-collection-store');
 var NowPlayingActions = require('./scripts/actions/now-playing-actions');
+var TracksCollectionActions = require('./scripts/actions/tracks-collection-actions');
 var AVPlayerManagerUtil = require('./scripts/utils/av-player-manager-util');
 var AppConstants = require('./scripts/constants/app-constants');
 var Icon = require('FAKIconImage');
@@ -74,41 +76,51 @@ var ReactNativeMusic = React.createClass({
 // List View For Browsing Songs
 var BrowseTracksView = React.createClass({
 
+  componentDidMount: function() {
+    TracksCollectionStore.addChangeListener(this.onChange);
+    this.fetchData();
+  },
+
+  componentWillUnmount: function() {
+    TracksCollectionStore.removeChangeListener(this.onChange);
+  },
+
   mixins: [TimerMixin],
 
   timeoutID: (null: any),
 
   getInitialState: function () {
     return {
+      tracksCollection: this.getTracksCollection(),
+      query: this.getTracksCollectionQuery(),
       dataSource: new ListView.DataSource({
         rowHasChanged: (row1, row2) => row1 !== row2
       })
     };
   },
 
-  componentDidMount: function() {
-    this.fetchData();
+  getTracksCollection: function () {
+    return TracksCollectionStore.getTracksCollection();
+  },
+
+  getTracksCollectionQuery: function () {
+    return TracksCollectionStore.getQuery();
   },
 
   fetchData: function (query) {
-    var queryString = '';
-    if (query) {
-      queryString = '&q=' + query
-    }
-    // Return live data
-    fetch(this.fetchEndpoint + queryString)
-      .then((response) => response.json())
-      .then((responseData) => {
-        this.setState({
-          dataSource: this.state.dataSource.cloneWithRows(responseData)
-        });
-      }).catch((error) => {
-        console.warn(error);
-      })
-      .done();
+    TracksCollectionActions.updateQuery(query);
   },
 
   fetchEndpoint: 'http://api.soundcloud.com/tracks.json?client_id=' + AppConstants.SOUNDCLOUD_CLIENT_ID,
+
+  onChange: function () {
+    console.log(this.getTracksCollection());
+    var tracks = this.getTracksCollection();
+    this.setState({
+      dataSource: tracks ? this.state.dataSource.cloneWithRows(tracks) : this.state.dataSource,
+      query: this.getTracksCollectionQuery()
+    });
+  },
 
   onSearchChange: function (event) {
     var q = event.nativeEvent.text.toLowerCase();
@@ -133,7 +145,7 @@ var BrowseTracksView = React.createClass({
             size={32}
             color={'#4472B9'}
             style={styles.playIcon}/>
-        <TextInput onChange={this.onSearchChange} placeholder={'Search Here'} style={styles.searchContainer}/>
+        <TextInput onChange={this.onSearchChange}  placeholder={'Search Here'} style={styles.searchContainer}/>
       </View>
     )
   },

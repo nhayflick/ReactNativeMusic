@@ -19,7 +19,6 @@ function playTrack (nowPlaying) {
 
 function updatePlaybackTime (time) {
   _playbackTime = time;
-  console.log(_playbackTime);
 }
 
 function pauseTrack () {
